@@ -464,13 +464,18 @@ class WdDio with DioMixin implements Dio {
     // mkdir
     await this._createParent(self, path, cancelToken: cancelToken);
 
+    // get file length
+    File file = File(path);
+    int fileLength = await file.length();
+
     var resp = await this.req(
       self,
       'PUT',
       path,
-      data: Stream.fromIterable(data.map((e) => [e])),
-      optionsHandler: (options) =>
-          options.headers?['content-length'] = data.length,
+      data: file.openRead(),
+      optionsHandler: (options) {
+        options.headers?['content-length'] = fileLength;
+      },
       onSendProgress: onProgress,
       cancelToken: cancelToken,
     );
